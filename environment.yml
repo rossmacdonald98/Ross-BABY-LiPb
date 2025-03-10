@@ -1,9 +1,9 @@
-name: libra-run-env
+name: BABY_1l_LiPb
 channels:
   - conda-forge
 dependencies:
   - python
-  - openmc # add version tag
+  - openmc~=0.15.0
   - openmc-plotter
   - numpy # add version tag
   - scipy # add version tag
@@ -16,7 +16,7 @@ dependencies:
   - pint
   - pip
   - pip:
-      - git+https://github.com/libra-project/libra-toolbox # add version tag
-      - openmc_data_downloader
+      - git+https://github.com/libra-project/libra-toolbox@v0.3
+      - openmc_data_downloader~=0.6.0
       - matplotlib-label-lines
-      - h-transport-materials
+      - h-transport-materials~=0.17
