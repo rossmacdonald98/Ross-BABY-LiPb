@@ -8,6 +8,7 @@ dependencies:
   - numpy # add version tag
   - scipy # add version tag
   - matplotlib # add version tag
+  - math
   - sympy
   - pandas
   - pint-pandas

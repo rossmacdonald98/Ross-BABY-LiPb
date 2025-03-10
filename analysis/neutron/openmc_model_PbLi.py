@@ -2,6 +2,7 @@ import openmc
 import vault
 from libra_toolbox.neutronics.neutron_source import A325_generator_diamond
 import helpers
+import math
 
 
 def baby_geometry(x_c: float, y_c: float, z_c: float):
@@ -23,7 +24,6 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     he_thickness = 0.6
     inconel_thickness = 0.3
     heater_gap = 0.878
-    PbLi_thickness = 6.388 + 0.13022  # without heater: 0.1081
     gap_thickness = 4.605
     cap = 1.422
     firebrick_thickness = 15.24
@@ -52,6 +52,10 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     firebrick_radius = 14.224
     vessel_radius = 15.593
     external_radius = 15.812
+
+    PbLi_volume = 1200 # 1L = 1000 cm3
+
+    PbLi_thickness = calculate_z_height(PbLi_radius, heater_r, heater_gap, PbLi_volume)
 
     source_h = 50.00
     source_x = x_c - 13.50
@@ -311,6 +315,16 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
 
     return sphere, PbLi_cell, cells
 
+def calculate_z_height(R, r, g, V):
+    """Calculates the height (H) of a cylindrical volume (radius R & volume V) with an inserted inner cylinder (radius r & gap from larger cylinder floor of g)."""
+    v1 = math.pi * R**2 * g # Volume of cylinder beneath heater
+    v2 = V - v1 # Volume of annulus around heater
+
+    h1 = g # Height below heater
+    h2 = v2 / (math.pi * (R**2 - r**2)) # Height of annulus around heater
+
+    H = h1 + h2 # Total height for given volume
+    return H
 
 def baby_model():
     """Returns an openmc model of the BABY experiment.
