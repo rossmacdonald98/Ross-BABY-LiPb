@@ -15,7 +15,7 @@ jobs:
         with:
           auto-update-conda: true
           environment-file: environment.yml
-          activate-environment: libra-run-env
+          activate-environment: BABY_1l_LiPb
 
       - name: Run neutronics model
         shell: bash -l {0}

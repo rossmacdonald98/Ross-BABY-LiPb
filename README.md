@@ -24,13 +24,13 @@ conda env create -f environment.yml
 
 ## Todo list:
 - [ ] [Link to Zenodo](https://zenodo.org/)
-- [ ] Change environment name in [`environment.yml`](environment.yml)
-- [ ] Change environment name in [CI workflows](.github/workflows)
+- [x] Change environment name in [`environment.yml`](environment.yml)
+- [x] Change environment name in [CI workflows](.github/workflows)
 - [ ] Modify [binder](https://mybinder.org/) badge by inserting the repo name
 - [ ] Add general run data to [`data/general.json`](data/general.json)
 - [ ] Add LSC data to [`data/tritium_detection`](data/tritium_detection)
 - [ ] Add neutron detection data to [`data/neutron_detection`](data/neutron_detection)
-- [ ] Add OpenMC model to [`analysis/neutron`](analysis/neutron)
+- [x] Add OpenMC model to [`analysis/neutron`](analysis/neutron)
 - [ ] Add Tritium model to [`analysis/tritium`](analysis/tritium)
 - [ ] Add the right version tags to [`environment.yml`](environment.yml)
 - [ ] Add and update information in the README
