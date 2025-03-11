@@ -53,7 +53,7 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     vessel_radius = 15.593
     external_radius = 15.812
 
-    PbLi_volume = 1200 # 1L = 1000 cm3
+    PbLi_volume = 1000 # 1L = 1000 cm3
 
     PbLi_thickness = calculate_z_height(PbLi_radius, heater_r, heater_gap, PbLi_volume)
 
