@@ -18,6 +18,8 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     """
 
     ####### Dimensions (all in cm) ######
+
+    ## Vertical dimensions
     epoxy_thickness = 2.54  # 1 inch
     alumina_compressed_thickness = 2.54  # 1 inch
     ov_base_thickness = 0.786
@@ -47,27 +49,29 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
         + z_c
     )
 
+    ## Radial dimensions
     heater_radius = 0.439
     PbLi_radius = 7.00
-    inconel_radius = 7.3
+    iv_external_radius = 7.3
     he_radius = 9.144
-    firebrick_radius = 14.224
-    vessel_radius = 15.593
-    external_radius = 15.812
+    furnace_radius = 14.224
+    ov_internal_radius = 15.593
+    ov_external_radius = 15.812
 
+    ## Calculated dimensions
     PbLi_volume = 1000 # 1L = 1000 cm3
 
     PbLi_thickness = calculate_z_height(PbLi_radius, heater_radius, heater_gap, PbLi_volume)
-
     cover_he_thickness = iv_height - PbLi_thickness # Gap between surface of PbLi and top boundary of inner vessel.
 
+    ## Source dimensions
     source_h = 50.00
     source_x = x_c - 13.50
     source_z = z_c - 5.635
     source_external_r = 5.00
     source_internal_r = 4.75
 
-    ######## Surfaces #################
+    ########## Surfaces ##########
     z_plane_1 = openmc.ZPlane(0.0 + z_c)
     z_plane_2 = openmc.ZPlane(epoxy_thickness + z_c)
     z_plane_3 = openmc.ZPlane(epoxy_thickness + alumina_compressed_thickness + z_c)
@@ -153,13 +157,13 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     z_plane_14 = openmc.ZPlane(z_c - table_height)
     z_plane_15 = openmc.ZPlane(z_c - table_height - epoxy_thickness)
 
-    ######## Cylinder #################
+    ########## Cylinder ##########
     z_cyl_1 = openmc.ZCylinder(x0=x_c, y0=y_c, r=PbLi_radius)
-    z_cyl_2 = openmc.ZCylinder(x0=x_c, y0=y_c, r=inconel_radius)
+    z_cyl_2 = openmc.ZCylinder(x0=x_c, y0=y_c, r=iv_external_radius)
     z_cyl_3 = openmc.ZCylinder(x0=x_c, y0=y_c, r=he_radius)
-    z_cyl_4 = openmc.ZCylinder(x0=x_c, y0=y_c, r=firebrick_radius)
-    z_cyl_5 = openmc.ZCylinder(x0=x_c, y0=y_c, r=vessel_radius)
-    z_cyl_6 = openmc.ZCylinder(x0=x_c, y0=y_c, r=external_radius)
+    z_cyl_4 = openmc.ZCylinder(x0=x_c, y0=y_c, r=furnace_radius)
+    z_cyl_5 = openmc.ZCylinder(x0=x_c, y0=y_c, r=ov_internal_radius)
+    z_cyl_6 = openmc.ZCylinder(x0=x_c, y0=y_c, r=ov_external_radius)
 
     right_cyl = openmc.model.RightCircularCylinder(
         (x_c, y_c, heater_z), heater_length, heater_radius, axis="z"
@@ -171,10 +175,10 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
         (source_x + 0.25, y_c, source_z), source_h - 0.50, source_internal_r, axis="x"
     )
 
-    ######## Sphere #################
+    ########## Sphere ##########
     sphere = openmc.Sphere(x0=x_c, y0=y_c, z0=z_c, r=50.00)  # before r=50.00
 
-    ######## Lead bricks positioned under the source #################
+    ########## Lead bricks positioned under the source ##########
     positions = [
         (x_c - 13.50, y_c, z_c - table_height),
         (x_c - 4.50, y_c, z_c - table_height),
@@ -194,7 +198,7 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
         )
         lead_blocks.append(lead_block_region)
 
-    # regions
+    ########## Regions ##########
     source_wall_region = -ext_cyl_source & +source_region
     source_region = -source_region
     epoxy_region = +z_plane_1 & -z_plane_2 & -sphere
