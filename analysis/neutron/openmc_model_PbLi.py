@@ -4,6 +4,32 @@ from libra_toolbox.neutronics.neutron_source import A325_generator_diamond
 import helpers
 import math
 
+############################################################################
+# Functions
+
+
+def calculate_breeder_depth(R, r, g, V):
+    """Calculates the height (H) of a cylindrical volume (radius R & volume V) with an
+    inserted inner cylinder (of radius r & gap from larger cylinder floor of g).
+
+    Args:
+        R (float): Major radius of breeder volume cylinder (cm)
+        r (float): Radius of inner cylinder inserted into breeder volume (cm)
+        g (float): Gap between floor of breeder volume cylinder and inserted inner cylinder (cm)
+        V (float): Volume of breeder material(cm3)
+
+    Returns:
+        (float): Depth of breeder material volume.
+    """
+    v1 = math.pi * R**2 * g  # Volume of cylinder beneath heater
+    v2 = V - v1  # Volume of annulus around heater
+
+    h1 = g  # Height below heater
+    h2 = v2 / (math.pi * (R**2 - r**2))  # Height of annulus around heater
+
+    H = h1 + h2  # Total height for given volume
+    return H
+
 
 def baby_geometry(x_c: float, y_c: float, z_c: float):
     """Returns the geometry for the BABY experiment.
@@ -36,7 +62,7 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     lead_height = 4.00
     lead_width = 8.00
     lead_length = 16.00
-    
+
     heater_length = 25.40
     heater_z = (
         epoxy_thickness
@@ -59,10 +85,14 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     ov_external_radius = 15.812
 
     ## Calculated dimensions
-    PbLi_volume = 1000 # 1L = 1000 cm3
+    PbLi_volume = 1000  # 1L = 1000 cm3
 
-    PbLi_thickness = calculate_z_height(PbLi_radius, heater_radius, heater_gap, PbLi_volume)
-    cover_he_thickness = iv_height - PbLi_thickness # Gap between surface of PbLi and top boundary of inner vessel.
+    PbLi_thickness = calculate_breeder_depth(
+        PbLi_radius, heater_radius, heater_gap, PbLi_volume
+    )
+    cover_he_thickness = (
+        iv_height - PbLi_thickness
+    )  # Gap between surface of PbLi and top boundary of inner vessel.
 
     ## Source dimensions
     source_h = 50.00
@@ -144,7 +174,11 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
         + z_c
     )
     z_plane_12 = openmc.ZPlane(
-        epoxy_thickness + alumina_compressed_thickness + ov_base_thickness + ov_height + z_c
+        epoxy_thickness
+        + alumina_compressed_thickness
+        + ov_base_thickness
+        + ov_height
+        + z_c
     )
     z_plane_13 = openmc.ZPlane(
         epoxy_thickness
@@ -323,16 +357,6 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
 
     return sphere, PbLi_cell, cells
 
-def calculate_z_height(R, r, g, V):
-    """Calculates the height (H) of a cylindrical volume (radius R & volume V) with an inserted inner cylinder (radius r & gap from larger cylinder floor of g)."""
-    v1 = math.pi * R**2 * g # Volume of cylinder beneath heater
-    v2 = V - v1 # Volume of annulus around heater
-
-    h1 = g # Height below heater
-    h2 = v2 / (math.pi * (R**2 - r**2)) # Height of annulus around heater
-
-    H = h1 + h2 # Total height for given volume
-    return H
 
 def baby_model():
     """Returns an openmc model of the BABY experiment.
@@ -417,11 +441,12 @@ SS316L.add_element("Mo", 0.00225, "wo")
 SS316L.add_element("Fe", 0.655599, "wo")
 
 # Lithium-Lead
+# Composition from certificate of analysis provided with Lithium-Lead from Camex
 lithium_lead = openmc.Material(name="Lithium Lead")
-lithium_lead.add_element("Pb", 0.993479 , "wo")
-lithium_lead.add_element("Li", 0.0064 , "wo")
-lithium_lead.add_element("Tl", 0.00002 , "wo")
-lithium_lead.add_element("Zn", 0.000002 , "wo")
+lithium_lead.add_element("Pb", 0.993479, "wo")
+lithium_lead.add_element("Li", 0.0064, "wo")
+lithium_lead.add_element("Tl", 0.00002, "wo")
+lithium_lead.add_element("Zn", 0.000002, "wo")
 lithium_lead.add_element("Sn", 0.000002, "wo")
 lithium_lead.add_element("Sb", 0.000002, "wo")
 lithium_lead.add_element("Ni", 0.000001, "wo")
@@ -430,7 +455,7 @@ lithium_lead.add_element("Cd", 0.000002, "wo")
 lithium_lead.add_element("Bi", 0.00008, "wo")
 lithium_lead.add_element("As", 0.000002, "wo")
 lithium_lead.add_element("Ag", 0.000008, "wo")
-lithium_lead.set_density("g/cm3", 10.45431283) # Density at 550C
+lithium_lead.set_density("g/cm3", 9.10411395)  # Density at 600C
 
 # Stainless Steel 304 from PNNL Materials Compendium (PNNL-15870 Rev2)
 SS304 = openmc.Material(name="Stainless Steel 304")
@@ -445,6 +470,8 @@ SS304.add_element("Ni", 0.095000, "wo")
 SS304.add_element("Fe", 0.683450, "wo")
 SS304.set_density("g/cm3", 8.00)
 
+# Central heater material
+# Data from where???
 heater_mat = openmc.Material(name="heater")
 heater_mat.add_element("C", 0.000990, "wo")
 heater_mat.add_element("Al", 0.003960, "wo")
@@ -464,8 +491,8 @@ heater_mat.set_density("g/cm3", 2.44)
 # Using Microtherm with 1 a% Al2O3, 27 a% ZrO2, and 72 a% SiO2
 # https://www.foundryservice.com/product/microporous-silica-insulating-boards-mintherm-microtherm-1925of-grades/
 furnace = openmc.Material(name="Furnace")
-# Estimate average temperature of Firebrick to be around 300 C
-# Firebrick.temperature = 273 + 300
+# Estimate average temperature of furnace insulation to be around 300 C
+# furnace.temperature = 273 + 300
 furnace.add_element("Al", 0.004, "ao")
 furnace.add_element("O", 0.666, "ao")
 furnace.add_element("Si", 0.240, "ao")
@@ -488,6 +515,7 @@ air.add_element("Ar", 0.012827, "wo")
 air.set_density("g/cm3", 0.0012)
 
 # epoxy
+# Data from where??
 epoxy = openmc.Material(name="Epoxy")
 epoxy.add_element("C", 0.70, "wo")
 epoxy.add_element("H", 0.08, "wo")
