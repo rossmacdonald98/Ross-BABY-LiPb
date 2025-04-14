@@ -31,6 +31,65 @@ def calculate_breeder_depth(R, r, g, V):
     return H
 
 
+def baby_model():
+    """Returns an openmc model of the BABY experiment.
+
+    Returns:
+        the openmc model
+    """
+
+    materials = [
+        SS316L,
+        lithium_lead,
+        SS304,
+        heater_mat,
+        furnace,
+        alumina,
+        lead,
+        air,
+        epoxy,
+        he,
+    ]
+
+    sphere, PbLi_cell, cells = baby_geometry(x_c, y_c, z_c)
+
+    ############################################################################
+    # Define Settings
+
+    settings = openmc.Settings()
+
+    src = A325_generator_diamond((x_c, y_c, z_c - 5.635), (1, 0, 0))
+    settings.source = src
+    settings.batches = 100
+    settings.inactive = 0
+    settings.run_mode = "fixed source"
+    settings.particles = int(1e4)
+    settings.output = {"tallies": False}
+    settings.photon_transport = False
+
+    ############################################################################
+    overall_exclusion_region = -sphere
+
+    ############################################################################
+    # Specify Tallies
+    tallies = openmc.Tallies()
+
+    tbr_tally = openmc.Tally(name="TBR")
+    tbr_tally.scores = ["(n,Xt)"]
+    tbr_tally.filters = [openmc.CellFilter(PbLi_cell)]
+    tallies.append(tbr_tally)
+
+    model = vault.build_vault_model(
+        settings=settings,
+        tallies=tallies,
+        added_cells=cells,
+        added_materials=materials,
+        overall_exclusion_region=overall_exclusion_region,
+    )
+
+    return model
+
+
 def baby_geometry(x_c: float, y_c: float, z_c: float):
     """Returns the geometry for the BABY experiment.
 
@@ -42,64 +101,6 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     Returns:
         the sphere, cllif cell, and cells
     """
-
-    ####### Dimensions (all in cm) ######
-
-    ## Vertical dimensions
-    epoxy_thickness = 2.54  # 1 inch
-    alumina_compressed_thickness = 2.54  # 1 inch
-    ov_base_thickness = 0.786
-    alumina_thickness = 0.635
-    he_thickness = 0.6
-    iv_base_thickness = 0.3
-    heater_gap = 0.878
-    iv_height = 10.8903
-    iv_cap = 1.422
-    furnace_thickness = 15.24
-    ov_height = 21.093
-    ov_cap = 2.392
-    table_height = 28.00
-    lead_height = 4.00
-    lead_width = 8.00
-    lead_length = 16.00
-
-    heater_length = 25.40
-    heater_z = (
-        epoxy_thickness
-        + alumina_compressed_thickness
-        + ov_base_thickness
-        + alumina_thickness
-        + he_thickness
-        + iv_base_thickness
-        + heater_gap
-        + z_c
-    )
-
-    ## Radial dimensions
-    heater_radius = 0.439
-    PbLi_radius = 7.00
-    iv_external_radius = 7.3
-    he_radius = 9.144
-    furnace_radius = 14.224
-    ov_internal_radius = 17.561
-    ov_external_radius = 17.78
-
-    ## Calculated dimensions
-    PbLi_volume = 1000  # 1L = 1000 cm3
-
-    PbLi_thickness = calculate_breeder_depth(
-        PbLi_radius, heater_radius, heater_gap, PbLi_volume
-    )
-    cover_he_thickness = (
-        iv_height - PbLi_thickness
-    )  # Gap between surface of PbLi and top boundary of inner vessel.
-
-    ## Source dimensions
-    source_h = 50.00
-    source_x = x_c - 13.50
-    source_z = z_c - 5.635
-    source_external_r = 5.00
-    source_internal_r = 4.75
 
     ########## Surfaces ##########
     z_plane_1 = openmc.ZPlane(0.0 + z_c)
@@ -358,67 +359,71 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
     return sphere, PbLi_cell, cells
 
 
-def baby_model():
-    """Returns an openmc model of the BABY experiment.
+############################################################################
+# Dimensions
+# All dimensions in cm
 
-    Returns:
-        the openmc model
-    """
+# BABY coordinates within vault
+x_c = 587  # cm
+y_c = 60  # cm
+z_c = 100  # cm
 
-    materials = [
-        SS316L,
-        lithium_lead,
-        SS304,
-        heater_mat,
-        furnace,
-        alumina,
-        lead,
-        air,
-        epoxy,
-        he,
-    ]
+## BABY vertical dimensions
+epoxy_thickness = 2.54  # 1 inch
+alumina_compressed_thickness = 2.54  # 1 inch
+ov_base_thickness = 0.786
+alumina_thickness = 0.635
+he_thickness = 0.6
+iv_base_thickness = 0.3
+heater_gap = 0.878
+iv_height = 10.8903
+iv_cap = 1.422
+furnace_thickness = 15.24
+ov_height = 21.093
+ov_cap = 2.392
+table_height = 28.00
+lead_height = 4.00
+lead_width = 8.00
+lead_length = 16.00
 
-    # BABY coordinates
-    x_c = 587  # cm
-    y_c = 60  # cm
-    z_c = 100  # cm
-    sphere, PbLi_cell, cells = baby_geometry(x_c, y_c, z_c)
+heater_length = 25.40
 
-    ############################################################################
-    # Define Settings
+heater_z = (
+    epoxy_thickness
+    + alumina_compressed_thickness
+    + ov_base_thickness
+    + alumina_thickness
+    + he_thickness
+    + iv_base_thickness
+    + heater_gap
+    + z_c
+)
 
-    settings = openmc.Settings()
+## BABY Radial dimensions
+heater_radius = 0.439
+PbLi_radius = 7.00
+iv_external_radius = 7.3
+he_radius = 9.144
+furnace_radius = 14.224
+ov_internal_radius = 17.561
+ov_external_radius = 17.78
 
-    src = A325_generator_diamond((x_c, y_c, z_c - 5.635), (1, 0, 0))
-    settings.source = src
-    settings.batches = 100
-    settings.inactive = 0
-    settings.run_mode = "fixed source"
-    settings.particles = int(1e4)
-    settings.output = {"tallies": False}
-    settings.photon_transport = False
+## Calculated dimensions
+PbLi_volume = 1000  # 1L = 1000 cm3
 
-    ############################################################################
-    overall_exclusion_region = -sphere
+PbLi_thickness = calculate_breeder_depth(
+    PbLi_radius, heater_radius, heater_gap, PbLi_volume
+)
+cover_he_thickness = (
+    iv_height - PbLi_thickness
+)  # Gap between surface of PbLi and top boundary of inner vessel.
 
-    ############################################################################
-    # Specify Tallies
-    tallies = openmc.Tallies()
-
-    tbr_tally = openmc.Tally(name="TBR")
-    tbr_tally.scores = ["(n,Xt)"]
-    tbr_tally.filters = [openmc.CellFilter(PbLi_cell)]
-    tallies.append(tbr_tally)
-
-    model = vault.build_vault_model(
-        settings=settings,
-        tallies=tallies,
-        added_cells=cells,
-        added_materials=materials,
-        overall_exclusion_region=overall_exclusion_region,
-    )
-
-    return model
+## Source dimensions
+source_h = 50.00
+source_x = x_c - 13.50
+source_z = z_c - 5.635
+source_external_r = 5.00
+source_internal_r = 4.75
 
 
 ############################################################################
@@ -541,6 +546,8 @@ lead.add_nuclide("Pb206", 0.241, "ao")
 lead.add_nuclide("Pb207", 0.221, "ao")
 lead.add_nuclide("Pb208", 0.524, "ao")
 
+############################################################################
+# Main
 
 if __name__ == "__main__":
     model = baby_model()
