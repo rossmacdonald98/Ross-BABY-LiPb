@@ -1,8 +1,8 @@
 import openmc
-import vault
+from libra_toolbox.neutronics import vault
 from libra_toolbox.neutronics.neutron_source import A325_generator_diamond
-import helpers
 import math
+import numpy as np
 
 ############################################################################
 # Functions
