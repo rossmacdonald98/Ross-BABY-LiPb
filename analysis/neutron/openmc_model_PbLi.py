@@ -72,12 +72,52 @@ def baby_model():
 
     ############################################################################
     # Specify Tallies
+
+    # Create a list of tallies
     tallies = openmc.Tallies()
 
+    # Create tally for entire Li2O cell for global TBR results
     tbr_tally = openmc.Tally(name="TBR")
     tbr_tally.scores = ["(n,Xt)"]
-    tbr_tally.filters = [openmc.CellFilter(PbLi_cell)]
+    tbr_tally.filters = [openmc.CellFilter(PbLi_cell)]  # Add cell filter to tally
+
+    # Create a second tally to add the mesh filter to for spatial TBR distribution results
+    tbr_tally_mesh = openmc.Tally(name="TBR_mesh")
+    tbr_tally_mesh.scores = ["(n,Xt)"]
+    tbr_tally_mesh.filters = [openmc.CellFilter(PbLi_cell)]
+    # Add cell filter to tally_mesh
+
+    # Create a cylindrical mesh
+    r_grid = np.linspace(
+        0, PbLi_radius, (int(PbLi_radius * 10)) + 1
+    )  # ~0.1cm radial bins (10x as many bins as breeder radius in cm)
+
+    phi_grid = (0, 2 * np.pi)  # 1 azimuthal bin to capture full 360 degrees
+
+    z_grid = np.linspace(
+        0, PbLi_thickness, (int(PbLi_thickness * 10)) + 1
+    )  # ~0.1cm axial bins (10x as many bins as breeder depth in cm)
+
+    mesh_origin = (
+        x_c,
+        y_c,
+        PbLi_z,
+    )  # Origin of the mesh aligned with xy position of BABY central axis, and z position of the bottom of the Li2O bed.
+
+    cyl_mesh = openmc.CylindricalMesh(r_grid, z_grid, phi_grid, mesh_origin)
+
+    # Create a mesh filter from the cylindrical mesh
+    mesh_filter = openmc.MeshFilter(cyl_mesh)
+
+    # Add cylindrical mesh filter to tbr_tally_mesh
+    tbr_tally_mesh.filters.append(mesh_filter)
+
+    # Append both tallies to the list of tallies
     tallies.append(tbr_tally)
+    tallies.append(tbr_tally_mesh)
+
+    ############################################################################
+    # Model
 
     model = vault.build_vault_model(
         settings=settings,
@@ -388,16 +428,17 @@ lead_length = 16.00
 
 heater_length = 25.40
 
-heater_z = (
+PbLi_z = (
     epoxy_thickness
     + alumina_compressed_thickness
     + ov_base_thickness
     + alumina_thickness
     + he_thickness
     + iv_base_thickness
-    + heater_gap
     + z_c
 )
+
+heater_z = PbLi_z + heater_gap
 
 ## BABY Radial dimensions
 heater_radius = 0.439
