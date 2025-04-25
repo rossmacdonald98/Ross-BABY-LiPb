@@ -1,9 +1,8 @@
-name: BABY_1l_LiPb
+name: BABY_1l_LiPb_PipFix
 channels:
   - conda-forge
 dependencies:
-  - python
-  - openmc~=0.15.0
+  - python=3.12
   - openmc-plotter
   - numpy # add version tag
   - scipy # add version tag
@@ -16,7 +15,8 @@ dependencies:
   - pint
   - pip
   - pip:
-      - libra-toolbox>=0.6.1
+      - git+https://github.com/libra-project/libra-toolbox@v0.6.1
+      - https://github.com/shimwell/wheels/raw/refs/heads/main/openmc/openmc-0.15.3-cp312-cp312-manylinux_2_28_x86_64.whl
       - openmc_data_downloader~=0.6.0
       - matplotlib-label-lines
       - h-transport-materials~=0.17
