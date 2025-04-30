@@ -12,6 +12,7 @@ dependencies:
   - pint-pandas
   - nbconvert
   - ipykernel
+  - vtk
   - pint
   - pip
   - pip:
