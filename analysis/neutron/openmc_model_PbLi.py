@@ -73,10 +73,13 @@ def baby_model():
     ############################################################################
     # Specify Tallies
 
+    # Specify the mesh cell size
+    cell_size = 0.2  # cm
+
     # Create a list of tallies
     tallies = openmc.Tallies()
 
-    # Create tally for entire Li2O cell for global TBR results
+    # Create tally for entire Lithium-Lead cell for global TBR results
     tbr_tally = openmc.Tally(name="TBR")
     tbr_tally.scores = ["(n,Xt)"]
     tbr_tally.filters = [openmc.CellFilter(PbLi_cell)]  # Add cell filter to tally
@@ -89,14 +92,16 @@ def baby_model():
 
     # Create a cylindrical mesh
     r_grid = np.linspace(
-        0, PbLi_radius, (int(PbLi_radius * 10)) + 1
-    )  # ~0.1cm radial bins (10x as many bins as breeder radius in cm)
+        0, PbLi_radius, (int(PbLi_radius / cell_size)) + 1
+    )  # bin width ≈ cell_size
 
-    phi_grid = (0, 2 * np.pi)  # 1 azimuthal bin to capture full 360 degrees
+    phi_grid = np.linspace(
+        0, 0.25 * np.pi, 10
+    )  # 10 angular bins over 1/8 full rotation
 
     z_grid = np.linspace(
-        0, PbLi_thickness, (int(PbLi_thickness * 10)) + 1
-    )  # ~0.1cm axial bins (10x as many bins as breeder depth in cm)
+        0, PbLi_thickness, (int(PbLi_thickness / cell_size)) + 1
+    )  # bin height ≈ cell_size
 
     mesh_origin = (
         x_c,
