@@ -74,7 +74,7 @@ def baby_model():
     # Specify Tallies
 
     # Specify the mesh cell size
-    cell_size = 0.2  # cm
+    cell_size = 0.15  # cm
 
     # Create a list of tallies
     tallies = openmc.Tallies()
@@ -96,8 +96,8 @@ def baby_model():
     )  # bin width ≈ cell_size
 
     phi_grid = np.linspace(
-        0, 0.25 * np.pi, 10
-    )  # 10 angular bins over 1/8 full rotation
+        0, 2 * np.pi, 40
+    )  # 40 angular bins over full rotation
 
     z_grid = np.linspace(
         0, PbLi_thickness, (int(PbLi_thickness / cell_size)) + 1
