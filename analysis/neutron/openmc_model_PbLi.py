@@ -95,9 +95,7 @@ def baby_model():
         0, PbLi_radius, (int(PbLi_radius / cell_size)) + 1
     )  # bin width ≈ cell_size
 
-    phi_grid = np.linspace(
-        0, 2 * np.pi, 40
-    )  # 40 angular bins over full rotation
+    phi_grid = np.linspace(0, 2 * np.pi, 81)  # 40 angular bins over full rotation
 
     z_grid = np.linspace(
         0, PbLi_thickness, (int(PbLi_thickness / cell_size)) + 1
