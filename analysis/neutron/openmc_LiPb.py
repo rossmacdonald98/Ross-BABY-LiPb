@@ -608,20 +608,20 @@ lead.add_nuclide("Pb208", 0.524, "ao")
 
 if __name__ == "__main__":
 
-    # Delete any existing statepoint and summary files
-    for file in glob.glob("LiPb_results.h5"):
-        os.remove(file)
-        print(f"Deleted existing file: {file}")
+    # Define results folder path
+    results_folder = "./results"
 
-    for file in glob.glob("summary.h5"):
+     # Delete any existing statepoint and summary files
+    for file in glob.glob(os.path.join(results_folder, "LiPb_results.h5")):
         os.remove(file)
         print(f"Deleted existing file: {file}")
 
     # Delete any existing processed_data.json file
-    processed_data_file = "LiPb_results.json"
+    processed_data_file = os.path.join(results_folder, "LiPb_results.json")
     if os.path.exists(processed_data_file):
         os.remove(processed_data_file)
         print(f"Deleted existing file: {processed_data_file}")
+
 
 
     model = baby_model()
@@ -629,7 +629,7 @@ if __name__ == "__main__":
 
     # Define file paths
     old_sp_path = f"statepoint.{model.settings.batches}.h5"
-    new_sp_path = "LiPb_results.h5"
+    new_sp_path = os.path.join(results_folder, "LiPb_results.h5")
 
     # Rename the statepoint file and load it
     try:
@@ -655,7 +655,7 @@ if __name__ == "__main__":
 
     import json
 
-    processed_data_file = "LiPb_results.json"
+    processed_data_file = os.path.join(results_folder, "LiPb_results.json")
 
     try:
         with open(processed_data_file, "r") as f:
