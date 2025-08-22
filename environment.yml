@@ -1,4 +1,4 @@
-name: BABY_1l_LiPb_PipFix
+name: BABY_LiPb_Dev
 channels:
   - conda-forge
 dependencies:
