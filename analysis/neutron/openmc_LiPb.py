@@ -6,6 +6,12 @@ import numpy as np
 import glob
 import os
 
+# Configure OpenMC to use local cross sections if available
+local_xs_path = os.path.abspath("./cross_sections/cross_sections.xml")
+if os.path.exists(local_xs_path):
+    openmc.config['cross_sections'] = local_xs_path
+    os.environ['OPENMC_CROSS_SECTIONS'] = local_xs_path # Ensure environment matches
+    print(f"Using local cross sections at: {local_xs_path}")
 
 ############################################################################
 # Functions
