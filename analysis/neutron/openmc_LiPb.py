@@ -647,15 +647,25 @@ if __name__ == "__main__":
     # Load the statepoint from the new path
     sp = openmc.StatePoint(new_sp_path)
 
-    tbr_tally = sp.get_tally(name="TBR").get_pandas_dataframe()
+    tally_obj = sp.get_tally(name="TBR")
 
-    print(f"TBR: {tbr_tally['mean'].iloc[0] :.6e}\n")
-    print(f"TBR std. dev.: {tbr_tally['std. dev.'].iloc[0] :.6e}\n")
+    # Access underlying numpy arrays directly to avoid pandas error
+    mean = tally_obj.mean.ravel()[0]
+    stdev = tally_obj.std_dev.ravel()[0]
 
-    processed_data = {
+    # Print the global TBR results
+    print(f"Global TBR: {mean:.6e}")
+    print(f"Global TBR Standard Deviation: {stdev:.6e}")
+
+    rel_stdev = stdev / mean
+
+    print(f"Relative standard deviation: {rel_stdev:.6e}\n")
+    print("Relative standard deviation below 1e-02 (1%) indicates good convergence.")
+
+    LiPb_results = {
         "modelled_TBR": {
-            "mean": tbr_tally["mean"].iloc[0],
-            "std_dev": tbr_tally["std. dev."].iloc[0],
+            "mean": mean,
+            "std_dev": stdev,
         }
     }
 
@@ -670,7 +680,7 @@ if __name__ == "__main__":
         print(f"Processed data file not found, creating it in {processed_data_file}")
         existing_data = {}
 
-    existing_data.update(processed_data)
+    existing_data.update(LiPb_results)
 
     with open(processed_data_file, "w") as f:
         json.dump(existing_data, f, indent=4)
