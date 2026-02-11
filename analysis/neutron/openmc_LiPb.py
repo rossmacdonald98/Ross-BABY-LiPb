@@ -414,7 +414,7 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
 # Setup 
 
 ## Define the BABY model
-mesh_switch = 0  # Enable (1) / disable (0) mesh tallies.
+mesh_switch = 1  # Enable (1) / disable (0) mesh tallies.
 cell_size = 0.1756  # cm # Size of mesh cells for mesh tallies
 batches = 100  # Number of batches for the simulation
 if mesh_switch == 1:
