@@ -61,7 +61,7 @@ def baby_model():
 
     settings = openmc.Settings()
 
-    src = A325_generator_diamond((x_c, y_c, z_c - 5.635), (1, 0, 0))
+    src = A325_generator_diamond((x_c, y_c, z_c - 5.635), (0, 0, 1))
     settings.source = src
     settings.batches = batches
     settings.inactive = 0
@@ -408,7 +408,7 @@ def baby_geometry(x_c: float, y_c: float, z_c: float):
 # Setup 
 
 ## Define the BABY model
-mesh_switch = 1  # Enable (1) / disable (0) mesh tallies.
+mesh_switch = 0  # Enable (1) / disable (0) mesh tallies.
 cell_size = 0.1756  # cm # Size of mesh cells for mesh tallies
 batches = 100  # Number of batches for the simulation
 if mesh_switch == 1:
